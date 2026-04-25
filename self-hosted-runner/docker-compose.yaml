@@ -7,7 +7,7 @@ services:
       RUNNER_ALLOW_RUNASROOT: true
       EPHEMERAL: true
       DISABLE_AUTO_UPDATE: true
-      REPO_URL: https://github.com/libp2p/unified-testing
+      REPO_URL: https://github.com/py-libp2p-runners/unified-testing
       RUNNER_NAME: ${RUNNER_NAME}-unified-testing
       ACCESS_TOKEN: ${ACCESS_TOKEN}
       RUNNER_SCOPE: 'repo'
