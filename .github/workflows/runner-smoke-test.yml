@@ -1,0 +1,40 @@
+name: Runner Smoke Test
+
+on:
+  workflow_dispatch:
+
+jobs:
+  smoke-test:
+    runs-on: [self-hosted, linux, x64, ephemeral]
+    steps:
+      - name: System info
+        run: |
+          echo "=== uname ==="
+          uname -a
+          echo "=== hostname ==="
+          hostname
+
+      - name: Tool versions
+        run: |
+          docker --version
+          docker compose version
+          docker buildx version
+          git --version
+          jq --version
+          yq --version
+          gh --version
+          aws --version
+
+      - name: Docker DooD check
+        run: |
+          echo "Running a container via host Docker daemon..."
+          docker run --rm alpine echo "✅ Alpine ran successfully via DooD"
+          echo "Host images visible from runner:"
+          docker images --format "table {{.Repository}}\t{{.Tag}}\t{{.Size}}" | head -10
+
+      - name: Cache mount check
+        run: |
+          echo "Cache dir contents:"
+          ls -la /srv/cache || echo "/srv/cache is empty or missing"
+          touch /srv/cache/smoke-test-$(date +%s)
+          echo "Write to cache: ✅"
