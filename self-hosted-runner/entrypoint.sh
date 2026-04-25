@@ -70,6 +70,10 @@ echo ""
 
 cd /actions-runner
 
+# Remove any leftover config from a previous run in the same container
+# (happens on restart: container filesystem persists, but runner already exited)
+rm -f .runner .credentials .credentials_rsaparams
+
 ./config.sh \
   --url "${RUNNER_URL}" \
   --token "${reg_token}" \

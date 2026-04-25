@@ -73,17 +73,31 @@ RUN arch=$(dpkg --print-architecture) && \
     chmod +x /usr/local/bin/yq
 
 # Install AWS CLI v2 (used by daily-full-interop.yml for S3 uploads)
-RUN curl -fsSL "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o /tmp/awscliv2.zip && \
+# Arch-aware: picks x86_64 on amd64 hosts, aarch64 on arm64 hosts
+RUN arch=$(dpkg --print-architecture) && \
+    case "$arch" in \
+      amd64)   aws_arch="x86_64" ;; \
+      arm64)   aws_arch="aarch64" ;; \
+      *)       echo "Unsupported arch: $arch" && exit 1 ;; \
+    esac && \
+    curl -fsSL "https://awscli.amazonaws.com/awscli-exe-linux-${aws_arch}.zip" -o /tmp/awscliv2.zip && \
     unzip -q /tmp/awscliv2.zip -d /tmp/aws-install && \
     /tmp/aws-install/aws/install --bin-dir /usr/local/bin --install-dir /usr/local/aws-cli && \
     rm -rf /tmp/awscliv2.zip /tmp/aws-install
 
 # Install GitHub Actions runner (latest stable at time of writing)
-ARG RUNNER_VERSION=2.330.0
+# Arch-aware: picks x64 on amd64 hosts, arm64 on arm64 hosts
+ARG RUNNER_VERSION=2.334.0
 WORKDIR /actions-runner
 
-RUN curl -L -o runner.tar.gz \
-        "https://github.com/actions/runner/releases/download/v${RUNNER_VERSION}/actions-runner-linux-x64-${RUNNER_VERSION}.tar.gz" && \
+RUN arch=$(dpkg --print-architecture) && \
+    case "$arch" in \
+      amd64)   runner_arch="x64" ;; \
+      arm64)   runner_arch="arm64" ;; \
+      *)       echo "Unsupported arch: $arch" && exit 1 ;; \
+    esac && \
+    curl -L -o runner.tar.gz \
+        "https://github.com/actions/runner/releases/download/v${RUNNER_VERSION}/actions-runner-linux-${runner_arch}-${RUNNER_VERSION}.tar.gz" && \
     tar xzf runner.tar.gz && \
     rm runner.tar.gz && \
     ./bin/installdependencies.sh && \
